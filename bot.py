@@ -41,6 +41,8 @@ def get_text_messages(message):
         key_yes = types.InlineKeyboardButton(text="Да, конечно!", callback_data="yes")
         keyboard.add(key_yes)
         bot.send_message(message.from_user.id,text=text, reply_markup=keyboard)
+
+
 def ask_spec(message):
     text="Выбери специальность"
     keyboard = types.InlineKeyboardMarkup()
@@ -117,8 +119,8 @@ def display_event(message,data):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
-    global query
-    global events
+    #global query
+    #global events
     if call.data == "yes":
         #query=[]
         #events=[]
