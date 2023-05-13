@@ -36,7 +36,7 @@ def create_key(text,callback_data):
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     if message.text=='/start':
-        text= "Привет, я - прототип бота проекта \"Маршруты карьеры\" \nЯ должен тебе несколько вопросов для продолжения.\nГотов ответить?"
+        text= "Привет, я - прототип бота проекта \"Маршруты карьеры\" \nЯ должен задать тебе несколько вопросов для продолжения.\nГотов ответить?"
         keyboard = types.InlineKeyboardMarkup()
         key_yes = types.InlineKeyboardButton(text="Да, конечно!", callback_data="yes")
         keyboard.add(key_yes)
