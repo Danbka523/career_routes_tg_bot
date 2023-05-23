@@ -6,7 +6,6 @@ from sqlite3 import Error
 
 bot=telebot.TeleBot(client_token)
 
-
 def execute_query(connection, query):
     cursor = connection.cursor()
     try:
@@ -26,18 +25,19 @@ def execute_read_query(connection, query):
     except Error as e:
         print(f"The error '{e}' occurred")
 
-
-
 def create_key(text,callback_data):
     return types.InlineKeyboardButton(text=text, callback_data=callback_data)
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message,data=""):
     if message.text=='/start':
+        bot.send_photo(chat_id=message.chat.id, photo=open('assets/img.jpg','rb'))
         text= "Привет! Меня зовут МаКар! Я буду рад помочь тебе с поиском — просто нажми кнопку, и я расскажу всё, что знаю!"
         keyboard = types.InlineKeyboardMarkup()
-        key_yes = types.InlineKeyboardButton(text="Начать поиск!", callback_data="spec")
-        key_about = types.InlineKeyboardButton(text="О проекте", callback_data="about")
+        key_yes = create_key(text="Начать поиск!", callback_data="spec")
+        key_about = create_key(text="О проекте", callback_data="about")
+        key_help = create_key(text="Помощь", callback_data="help")
+        keyboard.add(key_help)
         keyboard.add(key_yes)
         keyboard.add(key_about)
         bot.send_message(message.from_user.id,text=text, reply_markup=keyboard)
@@ -45,8 +45,10 @@ def get_text_messages(message,data=""):
     if data=="main_menu":
         text= "Привет! Меня зовут МаКар! Я буду рад помочь тебе с поиском — просто нажми кнопку, и я расскажу всё, что знаю!"
         keyboard = types.InlineKeyboardMarkup()
-        key_yes = types.InlineKeyboardButton(text="Начать поиск!", callback_data="spec")
-        key_about = types.InlineKeyboardButton(text="О проекте", callback_data="about")
+        key_yes = create_key(text="Начать поиск!", callback_data="spec")
+        key_about = create_key(text="О проекте", callback_data="about")
+        key_help = create_key(text="Помощь", callback_data="help")
+        keyboard.add(key_help)
         keyboard.add(key_yes)
         keyboard.add(key_about)
         bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id,  text=text, reply_markup=keyboard)
@@ -94,7 +96,7 @@ def ask_type_event(message,data):
     for event in events:
         key=create_key(event[0],callback_data="event;0"+data+"*"+event[0])
         keyboard.add(key)
-    key_yes = types.InlineKeyboardButton(text="Выбрать снова специальность", callback_data="spec")
+    key_yes = create_key(text="Выбрать снова специальность", callback_data="spec")
     keyboard.add(key_yes)
     bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id, text=text, reply_markup=keyboard)
 
@@ -129,7 +131,7 @@ def display_events(message,data, i):
         key=create_key("Посмотреть прошлые?", callback_data=f"event;{i-2}{data}")
         keyboard.add(key)
     
-    key_type = types.InlineKeyboardButton(text="Выбрать снова тип", callback_data=f"job;{dt[0]}")
+    key_type = create_key(text="Выбрать снова тип", callback_data=f"job;{dt[0]}")
     keyboard.add(key_type)
     bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id, text=text, reply_markup=keyboard)
 
@@ -146,7 +148,7 @@ def display_event(message,data):
     connection = sqlite3.connect("maindb.sqlite3")
     info=execute_read_query(connection,query)
     text=f"{info[0][0]}\n{info[0][1]}"
-    key_back = types.InlineKeyboardButton(text="Назад", callback_data=f"event;0{dt[0]}*{dt[1]}")
+    key_back = create_key(text="Назад", callback_data=f"event;0{dt[0]}*{dt[1]}")
     keyboard.add(key_back)
     main_menu_key = create_key("На главное меню", "main_menu")
     keyboard.add(main_menu_key)
@@ -154,9 +156,17 @@ def display_event(message,data):
 
 def display_about(message):
     text =  "\"Маршруты карьеры\" разработали для вас помощника в вопросах трудоустройства и практики! МаКар с удовольствием поделится самыми актуальными новостями, собранными со всего города! Больше никаких многочасовых поисков — только пара кликов, только свежие сведенья."
+    social = "Наша группа в ВК:vk.com/danbka523"
     keyboard = types.InlineKeyboardMarkup()
-    key_back = create_key("Вернуться назад", "main_menu")
+    key_back = create_key("Вернуться", "main_menu")
     keyboard.add(key_back)
+    bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id, text=f"{text}\n{social}",reply_markup=keyboard )
+
+def display_help(message):
+    text="В этом разделе будут предложены консулттации с экспертами(?????)\nРазличные полезные статьи и тесты тут тоже будут присутствовать"
+    keyboard = types.InlineKeyboardMarkup()
+    key_main_menu = create_key("На главное меню", "main_menu")
+    keyboard.add(key_main_menu)
     bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id, text=text,reply_markup=keyboard )
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -183,6 +193,9 @@ def callback_worker(call):
     if call.data=="main_menu":
         get_text_messages(call.message, call.data)
     
-    
+    if call.data=="help":
+        display_help(call.message)
+
+
 
 bot.polling(none_stop=True, interval=0)
