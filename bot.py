@@ -66,8 +66,9 @@ def ask_spec(message,i):
     jobs=execute_read_query(connection,query)
 
     for t in range(i, i+2):
-        key=create_key(jobs[t][0],callback_data="job;"+jobs[t][0])
-        keyboard.add(key)
+        if t<len(jobs):
+            key=create_key(jobs[t][0],callback_data="job;"+jobs[t][0])
+            keyboard.add(key)
 
     if i+2<len(jobs):
         key=create_key("Еще?", callback_data=f"spec;{i+2}")
