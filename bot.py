@@ -169,6 +169,7 @@ def display_events(message,data, i):
         keyboard.add(key)
     
     key_type = create_key(text="Выбрать снова тип", callback_data=f"job;{dt[1]}*{dt[2]}")
+    print(dt)
     keyboard.add(key_type)
     bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id, text=text, reply_markup=keyboard)
 
@@ -187,7 +188,7 @@ def display_event(message,data):
 
     text=f"{info[0][0]}\n{info[0][1]}\nКогда:{info[0][2]}\nПодробнее:{info[0][3]}"
 
-    key_back = create_key(text="Назад", callback_data=f"event;0{dt[0]}*{dt[1]}")
+    key_back = create_key(text="Назад", callback_data=f"event;0{dt[0]}*{dt[1]}*{dt[2]}")
     keyboard.add(key_back)
 
     main_menu_key = create_key("На главное меню", "main_menu")
@@ -196,7 +197,7 @@ def display_event(message,data):
     bot.edit_message_text(chat_id=message.chat.id,message_id=message.message_id, text=text,reply_markup=keyboard )
 
 def display_about(message):
-    text =  "\"Маршруты карьеры\" разработали для вас помощника в вопросах трудоустройства и практики\! Макар с удовольствием поделится самыми актуальными новостями, собранными со всего города\! Больше никаких многочасовых поисков — только пара кликов, только свежие сведенья\."
+    text =  "\"Маршруты карьеры\" разработали для вас помощника в вопросах трудоустройства и практики\! Макар с удовольствием поделится самыми актуальными новостями, собранными со всего города\! Больше никаких многочасовых поисков — только пара кликов, только свежие сведения\."
     social = "[Наша группа в ВК](vk.com/public220791588)"
     keyboard = types.InlineKeyboardMarkup()
     key_back = create_key("На главное меню", "main_menu")
