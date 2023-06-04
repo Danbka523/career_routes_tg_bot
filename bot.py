@@ -2,6 +2,7 @@ from secret import client_token
 from telebot import types
 import telebot
 import sqlite3
+import sys
 from sqlite3 import Error
 
 bot=telebot.TeleBot(client_token)
@@ -58,7 +59,7 @@ def ask_branch(message, i):
     keyboard = types.InlineKeyboardMarkup()
 
     query = '''
-    select branch_name from branches
+    select branch_name, branch_id from branches
     '''
 
     connection = sqlite3.connect("maindb.sqlite3")
@@ -66,7 +67,7 @@ def ask_branch(message, i):
 
     for t in range(i, i+2):
         if t<len(branches):
-            key=create_key(branches[t][0],callback_data="spec;0"+branches[t][0])
+            key=create_key(branches[t][0],callback_data="spec;0"+str(branches[t][1]))
             keyboard.add(key)
 
     if i+2<len(branches):
@@ -87,12 +88,12 @@ def ask_branch(message, i):
 def ask_spec(message,data,i):
     text="Выбери специальность"
     keyboard = types.InlineKeyboardMarkup()
-
+    b_id=int(data)
     query = f'''
-    select job_name from jobs as j
+    select job_name, job_id from jobs as j
     join branches as b
     on j.branch_id = b.branch_id
-    where b.branch_name = "{data}"
+    where b.branch_id = {b_id}
     '''
 
     connection = sqlite3.connect("maindb.sqlite3")
@@ -100,7 +101,7 @@ def ask_spec(message,data,i):
 
     for t in range(i, i+2):
         if t<len(jobs):
-            key=create_key(jobs[t][0],callback_data="job;"+jobs[t][0]+"*"+data)
+            key=create_key(str(jobs[t][0]),callback_data="job;"+str(jobs[t][1])+"*"+data)
             keyboard.add(key)
 
     if i+2<len(jobs):
@@ -124,13 +125,14 @@ def ask_type_event(message,data):
     keyboard = types.InlineKeyboardMarkup()
 
     query = '''
-    select event_type from events
+    select event_type, event_id from events
     '''
     connection = sqlite3.connect("maindb.sqlite3")
     events = execute_read_query(connection,query)
-
+ 
     for event in events:
-        key=create_key(event[0],callback_data="event;0"+event[0]+"*"+data)
+        
+        key=create_key(str(event[0]),callback_data="event;0"+str(event[1])+"*"+data)
         keyboard.add(key)
     key_yes = create_key(text="Выбрать снова специальность", callback_data=f"spec;0{dt[1]}")
     keyboard.add(key_yes)
@@ -141,23 +143,18 @@ def display_events(message,data, i):
     
     print(data)
     keyboard = types.InlineKeyboardMarkup(row_width=3)
-    text = f"Список:{dt[0]}"   
+    text = f"Вот, что я для тебя нашел:"   
     query_t = f'''
-        SELECT event_name FROM job_events as je
-        join events as e
-        on je.event_type_id = e.event_id
-        join jobs as j
-        on je.event_job_id = j.job_id
-        where j.job_name="{dt[1]}" and e.event_type="{dt[0]}"
-        
-        '''
+        SELECT event_name, event_id FROM job_events as je
+        where je.event_job_id = {dt[1]} and je.event_type_id = {dt[0]}
+    '''
     connection = sqlite3.connect("maindb.sqlite3")
     events = execute_read_query(connection,query_t)
         
     
     for n in range (i, i+2):
         if n<len(events):
-            key=create_key(events[n][0],callback_data=f"curr;{data}*{events[n][0]}")
+            key=create_key(str(events[n][0]),callback_data=f"curr;{data}*{str(events[n][1])}")
             keyboard.add(key)
    
     if i+2<len(events):
@@ -180,7 +177,7 @@ def display_event(message,data):
 
     query = f'''
     select event_name, event_desc, date, source from job_events
-    where event_name="{event}"
+    where event_id={int(event)}
     '''
 
     connection = sqlite3.connect("maindb.sqlite3")
